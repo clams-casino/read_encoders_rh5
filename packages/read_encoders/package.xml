@@ -1,0 +1,11 @@
+<package>
+  <name>read_encoders</name>
+  <version>0.1.0</version>
+  <description>
+  ROS package for reading wheel encoder information for duckietown RH5. Runs on duckiebot
+  </description>
+  <maintainer email="mike.zhang.619@gmail.com">Mike Zhang</maintainer>
+  <license>None</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>

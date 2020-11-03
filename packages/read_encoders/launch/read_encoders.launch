@@ -1,0 +1,10 @@
+<launch>
+
+  <group ns="$(arg veh)">  
+
+    <node pkg="read_encoders" type="read_encoders_node.py" name="read_encoders_node"  output="screen">
+    </node>
+
+  </group>
+
+</launch>
