@@ -22,7 +22,8 @@ class ReadEncodersNode(DTROS):
         self.veh_name = rospy.get_namespace().strip("/")
 
         # Get static parameters
-        self._radius = rospy.get_param(f'/{self.veh_name}/kinematics_node/radius', 100)
+        self._baseline = rospy.get_param(f'/{self.veh_name}/kinematics_node/baseline')
+        self._radius = rospy.get_param(f'/{self.veh_name}/kinematics_node/radius')
         self._C = 2.0*np.pi*self._radius / N_REV     # Precompute this multiplier
 
         # Subscribers
@@ -71,7 +72,7 @@ class ReadEncodersNode(DTROS):
             else:
                 self.right_true_ticks = self.right_direction*(msg.data - self.right_total_ticks) + self.right_true_ticks
                 self.right_total_ticks = msg.data
-                
+
             right_distance = self._C * self.right_true_ticks
             self.pub_integrated_distance_right.publish(right_distance)
 
