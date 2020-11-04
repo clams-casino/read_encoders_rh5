@@ -7,7 +7,7 @@ from duckietown_msgs.msg import Twist2DStamped, WheelEncoderStamped, WheelsCmdSt
 from std_msgs.msg import Header, Float32
 
 FORWARD = 1
-REVERSE = -1
+REVERSE = 0
 N_REV = 135
 
 class ReadEncodersNode(DTROS):
@@ -44,37 +44,24 @@ class ReadEncodersNode(DTROS):
 
         self.log("Initialized")
 
+        self.left_init = None
+        self.right_init = None
+
         self.left_direction = FORWARD
         self.right_direction = FORWARD
 
-        self.left_total_ticks = None
-        self.left_true_ticks = None
-
-        self.right_total_ticks = None
-        self.right_true_ticks = None
-
     def cb_encoder_data(self, wheel, msg):
         if wheel == 'left':
-            if self.left_total_ticks == None:
-                self.left_total_ticks = msg.data
-                self.left_true_ticks = self.left_direction
+            if self.left_init == None:
+                self.left_init = msg.data
             else:
-                self.left_true_ticks = self.left_direction*(msg.data - self.left_total_ticks) + self.left_true_ticks
-                self.left_total_ticks = msg.data
-
-            left_distance = self._C * self.left_true_ticks
-            self.pub_integrated_distance_left.publish(left_distance)
+                self.pub_integrated_distance_left.publish(self._C * (msg.data - self.left_init))
 
         elif wheel == 'right':
-            if self.right_total_ticks == None:
-                self.right_total_ticks = msg.data
-                self.right_true_ticks = self.right_direction
+            if self.right_init == None:
+                self.right_init = msg.data
             else:
-                self.right_true_ticks = self.right_direction*(msg.data - self.right_total_ticks) + self.right_true_ticks
-                self.right_total_ticks = msg.data
-
-            right_distance = self._C * self.right_true_ticks
-            self.pub_integrated_distance_right.publish(right_distance)
+                self.pub_integrated_distance_right.publish(self._C * (msg.data - self.right_init))
 
         else:
             rospy.logwarn("Invalid wheel. Either left or right")
@@ -94,6 +81,7 @@ class ReadEncodersNode(DTROS):
 
 if __name__ == '__main__':
     node = ReadEncodersNode(node_name='read_encoders_node')
+    rospy.loginfo("read_encoders_node is up and running...")
     # Keep it spinning to keep the node alive
     rospy.spin()
-    rospy.loginfo("read_encoders_node is up and running...")
+    
