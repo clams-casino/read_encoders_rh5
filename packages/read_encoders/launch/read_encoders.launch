@@ -3,6 +3,7 @@
   <group ns="$(arg veh)">  
 
     <node pkg="read_encoders" type="read_encoders_node.py" name="read_encoders_node"  output="screen">
+    <rosparam file="$(find read_encoders)/config/read_encoders_config.yaml" command="load"/>
     </node>
 
   </group>

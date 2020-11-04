@@ -10,6 +10,7 @@ FORWARD = 1
 REVERSE = 0
 N_REV = 135
 
+
 class ReadEncodersNode(DTROS):
 
     def __init__(self, node_name):
@@ -26,6 +27,7 @@ class ReadEncodersNode(DTROS):
         self._radius = rospy.get_param(f'/{self.veh_name}/kinematics_node/radius')
         self._C = 2.0*np.pi*self._radius / N_REV     # Precompute this multiplier
 
+
         # Subscribers
         self.sub_encoder_ticks_left = rospy.Subscriber('left_wheel_encoder_node/tick', 
                                                         WheelEncoderStamped,
@@ -39,8 +41,8 @@ class ReadEncodersNode(DTROS):
                                                       WheelsCmdStamped, self.cb_executed_commands)
 
         # Publishers
-        self.pub_integrated_distance_left = rospy.Publisher('~left_distance', Float32, queue_size=1)
-        self.pub_integrated_distance_right = rospy.Publisher('~right_distance', Float32, queue_size=1)
+        self.pub_integrated_distance_left = rospy.Publisher('~left_distance', Float32, queue_size=10)
+        self.pub_integrated_distance_right = rospy.Publisher('~right_distance', Float32, queue_size=10)
 
         self.log("Initialized")
 
@@ -50,18 +52,23 @@ class ReadEncodersNode(DTROS):
         self.left_direction = FORWARD
         self.right_direction = FORWARD
 
+        self.left_distance = 0
+        self.right_distance = 0
+
     def cb_encoder_data(self, wheel, msg):
         if wheel == 'left':
             if self.left_init == None:
                 self.left_init = msg.data
             else:
-                self.pub_integrated_distance_left.publish(self._C * (msg.data - self.left_init))
+                self.left_distance = self._C * (msg.data - self.left_init)
+                self.pub_integrated_distance_left.publish(self.left_distance)
 
         elif wheel == 'right':
             if self.right_init == None:
                 self.right_init = msg.data
             else:
-                self.pub_integrated_distance_right.publish(self._C * (msg.data - self.right_init))
+                self.right_distance = self._C * (msg.data - self.right_init)
+                self.pub_integrated_distance_right.publish(self.right_distance)
 
         else:
             rospy.logwarn("Invalid wheel. Either left or right")
